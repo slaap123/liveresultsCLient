@@ -1,0 +1,56 @@
+
+File     Tijd   Startlijst nr  Versie	|	 Startlijst	|	 Onderdeel    Serie
+001    11:10        30207313	|	1	|	           JPB groep 1	|	      40m     1
+00 2    
+11:10        30207313	|	1	|	           JPB groep 1	|	      40m     2
+00 3    
+11:10        30207313	|	1	|	           JPB groep 1	|	      40m     3
+00 4    
+11:10        30207313	|	1	|	           JPB groep 1	|	      40m     4
+00 5    
+11:10        30207313	|	1	|	           JPB groep 1	|	      40m     5
+00 6    
+11:40        302073 97	|	1	|		|	        JPMini	|	      40m     1
+00 7    
+11:40        30207397	|	1	|		|	        JPMini	|	      40m     2
+00 8    
+11:50        302075 60	|	1	|	         MPMini	|	      40m     1
+00 9    
+12:10        30207545	|	1	|	           MP C	|	  40m     1
+010    12:10        30207545	|	1	|	           MPC	|	  40m     2
+011    12:30        30207355	|	1	|	           JPC groep 1	|	      40m     1
+012    12:30        30207355	|	1	|	           JPC groep 1	|	      40m     2
+013    12:30        30207355	|	1	|	           JPC groep 1	|	      40m     3
+014    12:30        30207355	|	1	|	           JPC groep 1	|	      40m     4
+015    12:30        30207355	|	1	|	           JPC groep 1	|	      40m     5
+016    13:00        30207512	|	1	|	   MPB groep 1	|	      40m     1
+017    13:00        30207512	|	1	|	   MPB groep 1	|	      40m     2
+018    13:00        30207512	|	1	|	   MPB groep 1	|	      40m     3
+019    13:00        30207512	|	1	|	   MPB groep 1	|	      40m     4
+020    13:35        302072 80	|	1	|		|	           JPA1	|	      60m     1
+021    13:35        30207280	|	1	|		|	           JPA1	|	      60m     2
+022    13:35        30207280	|	1	|		|	           JPA1	|	      60m     3
+023    13:35        30207280	|	1	|		|	           JPA1	|	      60m     4
+024    13:50        30207470	|	1	|	 MPA1 groep 1	|	      60m     1
+025    13:50        30207470	|	1	|	 MPA1 groep 1	|	      60m     2
+026    13:50        30207470	|	1	|	 MPA1 groep 1	|	      60m     3
+027    13:50        30207470	|	1	|	 MPA1 groep 1	|	      60m     4
+028    14:10        30207428	|	1	|	 MPA2 Groep 1	|	      60m     1
+029    14:10        30207428	|	1	|	 MPA2 Groep 1	|	      60m     2
+030    14:10        30207428	|	1	|	 MPA2 Groep 1	|	      60m     3
+031    14:10        30207428	|	1	|	 MPA2 Groep 1	|	      60m     4
+032    14:40        31973563	|	2	|	         JPA2 groep 1	|	      60m    1
+033    14:40        31973563	|	2	|	         JPA2 groep 1	|	      60m     2
+034    14:40        31973563	|	2	|	         JPA2 groep 1	|	      60m     3
+035    14:40        31973563	|	2	|	         JPA2 groep 1	|	      60m     4
+036    14:40        31973563	|	2	|	         JPA2 groep 1	|	      60m     5
+037    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     1
+038    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     2
+039    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     3
+040    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     4
+041    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     5
+042    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     6
+043    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     7
+044    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     8
+045    15:10        31790222	|	 Sprint1 JUN AB SEN 1e reeks	|	      60m     9
+046    15:40        31568051	|	2    Msen - 60mH 1e reeks	|	   60mH     1
