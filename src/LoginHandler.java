@@ -115,11 +115,13 @@ public class LoginHandler {
         if (responseEntity != null) {
             responseString = EntityUtils.toString(responseEntity);
         }
-        System.out.println(responseString);
+        //System.out.println(responseString);
+        
 
         // set cookies
         setCookies(response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString());
         post.releaseConnection();
+        getZip(nuid);
     }
 
     private String sendPost(String url, List<NameValuePair> postParams)

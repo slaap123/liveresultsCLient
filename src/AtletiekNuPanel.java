@@ -111,16 +111,25 @@ public class AtletiekNuPanel extends JPanel {
         handelr.start();
     }
 
-    private void UpdateList() {
+    public void UpdateList() {
         try {
             loginHandler.getZip(MainWindow.mainObj.wedstrijdId + "");
             unzip.unzip("tmp.zip", baseDir.getPath());
             new File("tmp.zip").delete();
-            
+            ((DefaultTableModel)parFileNames.getModel()).setRowCount(0);
             for (File fileEntry : baseDir.listFiles()) {
                 if (fileEntry.getName().endsWith("par")) {
-                    ParFile entry=new ParFile(fileEntry);
-                    ((DefaultTableModel)parFileNames.getModel()).addRow(new Object[]{entry.fileName,entry.onderdeel+" "+entry.startgroep,entry.serie});
+                    ParFile entry=null;
+                    if(parFiles.containsKey(fileEntry.getName())){
+                        entry=parFiles.get(fileEntry.getName());
+                        entry.getValuesFromFile(fileEntry);
+                    }else{
+                        entry=new ParFile(fileEntry);
+                    }
+                    System.out.println("GotResults:"+entry.gotResults);
+                    if(!entry.gotResults){
+                        ((DefaultTableModel)parFileNames.getModel()).addRow(new Object[]{entry.fileName,entry.onderdeel+" "+entry.startgroep,entry.serie});
+                    }
                     parFiles.put(fileEntry.getName(),entry);
                 }
             }

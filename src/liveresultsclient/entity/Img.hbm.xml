@@ -23,7 +23,7 @@
         <property name="uploadDate" type="string">
             <column name="uploadDate" length="45" not-null="true" />
         </property>
-        <set name="series" table="serie" inverse="true" lazy="true" fetch="select">
+        <set name="series" cascade="all" table="serie" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="finishFOTO" />
             </key>

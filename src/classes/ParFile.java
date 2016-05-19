@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class ParFile {
 
-    public String startlijst_onderdeel_id;
+    public int startlijst_onderdeel_id;
     public String versie;
     public String begin_tijd;
     public String startgroep;
@@ -64,12 +64,12 @@ public class ParFile {
             }
         }
         String[] lines=content.split("\n");
-        startlijst_onderdeel_id=lines[0].split(":")[1].replaceAll("[ \t]*", "");
-        versie=lines[1].split(":")[1].replaceAll("[ \t]*", "");
-        begin_tijd=lines[2].split(":")[1].replaceAll("[ \t]*", "");
-        startgroep=lines[3].split(":")[1].replaceAll("[ \t]*", "");
-        onderdeel=lines[4].split(":")[1].replaceAll("[ \t]*", "");
-        serie=lines[5].split(":")[1].replaceAll("[ \t]*", "");
+        startlijst_onderdeel_id=Integer.parseInt(lines[0].split(":")[1].replaceAll("[ \t\n\r]*", ""));
+        versie=lines[1].split(":")[1].replaceAll("[ \t\r\n]*", "");
+        begin_tijd=lines[2].split(":")[1].replaceAll("[ \t\r\n]*", "");
+        startgroep=lines[3].split(":")[1].replaceAll("[ \t\r\n]*", "");
+        onderdeel=lines[4].split(":")[1].replaceAll("[ \t\r\n]*", "");
+        serie=lines[5].split(":")[1].replaceAll("[ \t\r\n]*", "");
         for (int i = 6; i < lines.length; i++) {
             if(lines[i].length()>2){
                 atleten.add(new ParFileEntry(lines[i].split("\t")));
