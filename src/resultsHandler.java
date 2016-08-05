@@ -33,19 +33,18 @@ import utils.HibernateUtil;
  */
 public class resultsHandler extends Thread {
 
-    
-
     private File dir;
     private Queue uitslagen = new LinkedList();
     private ArrayList<File> files = new ArrayList<File>();
     private HibernateSessionHandler sessionHandler;
+
     public resultsHandler(File dir) {
         this.dir = dir;
     }
 
     @Override
     public void run() {
-        sessionHandler=HibernateSessionHandler.get();
+        sessionHandler = HibernateSessionHandler.get();
         while (true) {
             System.out.println("start reading");
             for (File fileEntry : dir.listFiles()) {
@@ -60,14 +59,16 @@ public class resultsHandler extends Thread {
             }
             try {
                 AtletiekNuPanel.panel.loginHandler.submitResults(files);
+                System.out.println("upload");
                 files.clear();
             } catch (Exception ex) {
+                System.out.println("failed to upload");
                 Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
             AtletiekNuPanel.panel.UpdateList();
             System.out.println("end reading");
             try {
-                sleep(30000);
+                sleep(2000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -97,17 +98,18 @@ public class resultsHandler extends Thread {
                 }
             }
         }
-        Onderdelen onderdeel = sessionHandler.getObject(Onderdelen.class,new Object[] {parFile.startlijst_onderdeel_id}, new String[]{"externalId"});
-        int serieNr=Integer.parseInt(parFile.serie.replaceAll("[\n\r ]", ""));
-        Serie serie = sessionHandler.getObject(Serie.class,new Object[] {onderdeel,serieNr} , new String[]{"onderdelen","serieNummer"});
-        
+        Onderdelen onderdeel = sessionHandler.getObject(Onderdelen.class, new Object[]{parFile.startlijst_onderdeel_id}, new String[]{"externalId"});
+        int serieNr = Integer.parseInt(parFile.serie.replaceAll("[\n\r ]", ""));
+        Serie serie = sessionHandler.getObject(Serie.class, new Object[]{onderdeel, serieNr}, new String[]{"onderdelen", "serieNummer"});
+
         File jpg = new File(file.getAbsolutePath().replace("txt", "jpg"));
-        Img foto=null;
+        Img foto = null;
         if (jpg.exists()) {
-            if(serie==null){
-                foto=new Img();
-            }else
+            if (serie == null) {
+                foto = new Img();
+            } else {
                 foto = serie.getImg();
+            }
             try {
                 foto.setContent(Files.readAllBytes(Paths.get(jpg.getPath())));
                 foto.setName(jpg.getName());
@@ -119,8 +121,8 @@ public class resultsHandler extends Thread {
             }
             uitslagen.add(foto);
         }
-        if(serie==null){
-            serie=new Serie();
+        if (serie == null) {
+            serie = new Serie();
         }
         String[] lines = content.split("\n");
         serie.setWind(lines[0].split("\t")[1]);
@@ -130,21 +132,29 @@ public class resultsHandler extends Thread {
         uitslagen.add(serie);
         int atleten = 0;
         for (int i = 8; i < lines.length; i++) {
-            String[] split = lines[i].split("\t");
-            Uitslagen uitslag= sessionHandler.getObject(Uitslagen.class,new Object[]{serieNr,onderdeel.getId(),Integer.parseInt(split[1])}, new String[]{"serieNummer","onderdelen.id","baan"});
-            if(uitslag==null){
-                uitslag = new Uitslagen();
+            String[] split = lines[i].replaceAll("\n\r", "").split("\t");
+            Uitslagen uitslag;
+            if (split.length >= 4 && split[3].length()>0) {
+                int baan=0;
+                if(split[1].length()>0){
+                    baan=Integer.parseInt(split[1]);
+                }
+                uitslag = sessionHandler.getObject(Uitslagen.class, new Object[]{serieNr, onderdeel.getId(), Integer.parseInt(split[3])}, new String[]{"serieNummer", "onderdelen.id", "atleten.startnummer"});
+
+                if (uitslag == null) {
+                    uitslag = new Uitslagen();
+                }
+                uitslag.setOpmerking("");
+                uitslag.setBaan(baan);
+                uitslag.setResultaat(split[2]);
+                Atleten atleet = sessionHandler.getObject(Atleten.class, new Object[]{Integer.parseInt(split[3]), MainWindow.mainObj.wedstrijdId}, new String[]{"startnummer", "wedstrijden.id"});
+                uitslag.setAtleten(atleet);
+                uitslag.setInvoerTijd(new Date());
+                uitslag.setSerieNummer(serieNr);
+                uitslag.setOnderdelen(onderdeel);
+                uitslagen.add(uitslag);
+                atleten++;
             }
-            uitslag.setOpmerking("");
-            uitslag.setBaan(Integer.parseInt(split[1]));
-            uitslag.setResultaat(split[2]);
-            Atleten atleet = sessionHandler.getObject(Atleten.class,new Object[]{Integer.parseInt(split[3]),MainWindow.mainObj.wedstrijdId}, new String[]{"startnummer","wedstrijden.id"});
-            uitslag.setAtleten(atleet);
-            uitslag.setInvoerTijd(new Date());
-            uitslag.setSerieNummer(serieNr);
-            uitslag.setOnderdelen(onderdeel);
-            uitslagen.add(uitslag);
-            atleten++;
         }
         String text = AtletiekNuPanel.panel.jTextPane1.getText();
         AtletiekNuPanel.panel.jTextPane1.setText(file.getName() + " met " + atleten + " atleten\n" + text);
@@ -154,11 +164,8 @@ public class resultsHandler extends Thread {
     private void SaveNewRecords() {
         while (!uitslagen.isEmpty()) {
             try {
-                Session session = HibernateUtil.getSessionFactory().openSession();
-                session.beginTransaction();
-                System.out.println("saving: "+uitslagen.peek().getClass().getName());
-                session.saveOrUpdate(uitslagen.poll());
-                session.getTransaction().commit();
+                System.out.println("saving: " + uitslagen.peek().getClass().getName());
+                sessionHandler.save(uitslagen.poll());
             } catch (HibernateException he) {
                 he.printStackTrace();
             }

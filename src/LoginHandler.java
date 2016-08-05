@@ -90,7 +90,7 @@ public class LoginHandler {
     }
 
     public void submitResults(ArrayList<File> fiels) throws Exception {
-        String url = "https://www.atletiek.nu/wedstrijd/uitslageninvoermenu/" + nuid + "/";
+        String url = "https://www.atletiek.nu/feeder.php?page=resultateninvoer&do=uploadresultaat&event_id=" + nuid + "";
         System.out.println(url);
         HttpPost post = new HttpPost(url);
 
@@ -109,19 +109,18 @@ public class LoginHandler {
         HttpResponse response = client.execute(post);
         int responseCode = response.getStatusLine().getStatusCode();
 
-        System.out.println("Response Code : " + responseCode);
+        System.out.println("Response Code submit: " + responseCode);
         HttpEntity responseEntity = response.getEntity();
         String responseString="";
         if (responseEntity != null) {
             responseString = EntityUtils.toString(responseEntity);
         }
         //System.out.println(responseString);
-        
 
         // set cookies
         setCookies(response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString());
         post.releaseConnection();
-        getZip(nuid);
+        //getZip(nuid);
     }
 
     private String sendPost(String url, List<NameValuePair> postParams)

@@ -30,6 +30,7 @@ import liveresultsclient.entity.Wedstrijden;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import utils.HibernateSessionHandler;
 
 /**
  *
@@ -50,12 +51,16 @@ public class MainWindow extends javax.swing.JFrame {
     
     public static MainWindow mainObj;
     
+    private HibernateSessionHandler sessionHandler;
+    
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
+        sessionHandler=HibernateSessionHandler.get();
         UpdateGui();
+        
     }
 
     public void UpdateGui() {
@@ -76,7 +81,7 @@ public class MainWindow extends javax.swing.JFrame {
             Tabs.setEnabledAt(0, true);
             Tabs.setEnabledAt(1, true);
             try{
-                int wid=((AtletiekNu)executeHQLQuery("from AtletiekNu where wedstrijdid = "+wedstrijdId).get(0)).getNuid();
+                int wid=((AtletiekNu)sessionHandler.executeHQLQuery("from AtletiekNu where wedstrijdid = "+wedstrijdId).get(0)).getNuid();
                 AtletiekNuPanel.GetAtletiekNuPanel(Tabs,wid);
             }catch(Exception ex){
                 Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -84,22 +89,9 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    public List executeHQLQuery(String hql) {
-        List resultList = null;
-        try {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            Query q = session.createQuery(hql);
-            resultList = q.list();
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            he.printStackTrace();
-        }
-        return resultList;
-    }
 
     private void displayResultWedstrijden(String query, JTable table) {
-        List resultList = executeHQLQuery(query);
+        List resultList = sessionHandler.executeHQLQuery(query);
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Naam");
@@ -138,7 +130,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void displayResultOnderdelen(String query, JTable table) {
-        List resultList = executeHQLQuery(query);
+        List resultList = sessionHandler.executeHQLQuery(query);
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Naam");
@@ -181,7 +173,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void displayResultAtleten(String query, JTable table) {
-        List resultList = executeHQLQuery(query);
+        List resultList = sessionHandler.executeHQLQuery(query);
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Naam");
@@ -204,7 +196,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void displayResultStartLijst(String query, JTable table) {
-        List resultList = executeHQLQuery(query);
+        List resultList = sessionHandler.executeHQLQuery(query);
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Serie");
