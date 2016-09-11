@@ -8,6 +8,7 @@
  *
  * @author woutermkievit
  */
+import classes.ParFile;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -33,6 +34,9 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONString;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -60,7 +64,7 @@ public class LoginHandler {
     }
 
     public void getZip(String id) throws Exception {
-        String url = "https://www.atletiek.nu/feeder.php?page=exportstartlijstentimetronics&event_id=" + nuid;
+        String url = "https://www.atletiek.nu/feeder.php?page=exportstartlijstentimetronics&event_id=" + nuid+"&forceAlleenGeprinteLijsten=1";
         System.out.println(url);
         HttpGet request = new HttpGet(url);
 
@@ -89,7 +93,7 @@ public class LoginHandler {
         request.releaseConnection();
     }
 
-    public void submitResults(ArrayList<File> fiels) throws Exception {
+    public void submitResults(ArrayList<ParFile> files) throws Exception {
         String url = "https://www.atletiek.nu/feeder.php?page=resultateninvoer&do=uploadresultaat&event_id=" + nuid + "";
         System.out.println(url);
         HttpPost post = new HttpPost(url);
@@ -99,8 +103,8 @@ public class LoginHandler {
         post.setHeader("Accept-Language", "en-US,en;q=0.5");
         post.setHeader("Cookie", getCookies());
         MultipartEntity mpEntity = new MultipartEntity();
-        for (int i = 0; i < fiels.size(); i++) {
-            File file = fiels.get(i);
+        for (int i = 0; i < files.size(); i++) {
+            File file = files.get(i).resultFile;
             ContentBody cbFile = new FileBody(file, "text/plain");
             mpEntity.addPart("files", cbFile);
         }
@@ -115,8 +119,11 @@ public class LoginHandler {
         if (responseEntity != null) {
             responseString = EntityUtils.toString(responseEntity);
         }
-        //System.out.println(responseString);
-
+        JSONObject obj=new JSONObject(responseString);
+        for(Object FileObj: (JSONArray)obj.get("files")){
+            JSONObject JSONFile=(JSONObject)FileObj;
+            AtletiekNuPanel.panel.jTextPane1.setText("Uploaded "+JSONFile.get("name")+" met "+JSONFile.get("totaalverwerkt")+" atleten");
+        }
         // set cookies
         setCookies(response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString());
         post.releaseConnection();

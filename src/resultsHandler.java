@@ -2,11 +2,13 @@
 import classes.ParFile;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -17,6 +19,7 @@ import liveresultsclient.entity.Img;
 import liveresultsclient.entity.Onderdelen;
 import liveresultsclient.entity.Serie;
 import liveresultsclient.entity.Uitslagen;
+import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import utils.HibernateSessionHandler;
@@ -35,7 +38,7 @@ public class resultsHandler extends Thread {
 
     private File dir;
     private Queue uitslagen = new LinkedList();
-    private ArrayList<File> files = new ArrayList<File>();
+    private ArrayList<ParFile> files = new ArrayList<ParFile>();
     private HibernateSessionHandler sessionHandler;
 
     public resultsHandler(File dir) {
@@ -52,20 +55,26 @@ public class resultsHandler extends Thread {
                     ParFile parFile = AtletiekNuPanel.panel.parFiles.get(fileEntry.getName().replace("txt", "par"));
                     if (parFile != null && parFile.resultSize != fileEntry.length()) {
                         readResults(fileEntry, parFile);
+                        parFile.resultFile=fileEntry;
                         parFile.gotResults = true;
-                        files.add(fileEntry);
+                        files.add(parFile);
                     }
                 }
             }
             try {
-                AtletiekNuPanel.panel.loginHandler.submitResults(files);
+                if(!AtletiekNuPanel.panel.test&&files.size()>0){
+                    AtletiekNuPanel.panel.loginHandler.submitResults(files);
+                }
                 System.out.println("upload");
                 files.clear();
             } catch (Exception ex) {
                 System.out.println("failed to upload");
                 Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            AtletiekNuPanel.panel.UpdateList();
+            if(!AtletiekNuPanel.panel.test){
+                AtletiekNuPanel.panel.UpdateList();
+            }
+            AtletiekNuPanel.panel.UpdateListFromLocal();
             System.out.println("end reading");
             try {
                 sleep(2000);
@@ -105,10 +114,11 @@ public class resultsHandler extends Thread {
         File jpg = new File(file.getAbsolutePath().replace("txt", "jpg"));
         Img foto = null;
         if (jpg.exists()) {
-            if (serie == null) {
-                foto = new Img();
-            } else {
+            if (serie != null) {
                 foto = serie.getImg();
+            }
+            if(foto==null){
+                foto = new Img();
             }
             try {
                 foto.setContent(Files.readAllBytes(Paths.get(jpg.getPath())));
@@ -124,20 +134,21 @@ public class resultsHandler extends Thread {
         if (serie == null) {
             serie = new Serie();
         }
-        String[] lines = content.split("\n");
-        serie.setWind(lines[0].split("\t")[1]);
+        ArrayList<String> lines = new ArrayList<String>(Arrays.asList(content.split("\n")));
+        lines=CheckResultsFile(file, parFile, lines);
+        serie.setWind(lines.get(0).split("\t")[1]);
         serie.setImg(foto);
         serie.setOnderdelen(onderdeel);
         serie.setSerieNummer(serieNr);
         uitslagen.add(serie);
         int atleten = 0;
-        for (int i = 8; i < lines.length; i++) {
-            String[] split = lines[i].replaceAll("\n\r", "").split("\t");
+        for (int i = 8; i < lines.size(); i++) {
+            String[] split = lines.get(i).replaceAll("\n\r", "").split("\t");
             Uitslagen uitslag;
-            if (split.length >= 4 && split[3].length()>0) {
-                int baan=0;
-                if(split[1].length()>0){
-                    baan=Integer.parseInt(split[1]);
+            if (split.length >= 4 && split[3].length() > 0) {
+                int baan = 0;
+                if (split[1].length() > 0) {
+                    baan = Integer.parseInt(split[1]);
                 }
                 uitslag = sessionHandler.getObject(Uitslagen.class, new Object[]{serieNr, onderdeel.getId(), Integer.parseInt(split[3])}, new String[]{"serieNummer", "onderdelen.id", "atleten.startnummer"});
 
@@ -156,9 +167,12 @@ public class resultsHandler extends Thread {
                 atleten++;
             }
         }
+
         String text = AtletiekNuPanel.panel.jTextPane1.getText();
         AtletiekNuPanel.panel.jTextPane1.setText(file.getName() + " met " + atleten + " atleten\n" + text);
-        SaveNewRecords();
+        if(!AtletiekNuPanel.panel.test){
+            SaveNewRecords();
+        }
     }
 
     private void SaveNewRecords() {
@@ -168,7 +182,42 @@ public class resultsHandler extends Thread {
                 sessionHandler.save(uitslagen.poll());
             } catch (HibernateException he) {
                 he.printStackTrace();
+            }catch (AssertionFailure he){
+                he.printStackTrace();
             }
         }
+    }
+
+    private ArrayList<String> CheckResultsFile(File file, ParFile parFile, ArrayList<String> lines) {
+        if (!lines.get(1).startsWith("#")) {
+            ArrayList<String> newLines = new ArrayList<String>();
+            newLines.addAll(lines);
+            newLines.addAll(1, parFile.getHeaderInfo());
+            FileWriter writer = null;
+            
+            try {
+                writer = new FileWriter(file.getAbsolutePath());
+                for (int i = 0; i < newLines.size(); i++) {
+                    if(i>0)
+                        writer.append(System.getProperty("line.separator"));
+                    writer.append(newLines.get(i));
+                }
+                writer.flush();
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    writer.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            file = new File(file.getAbsolutePath());
+            parFile.resultSize = file.length();
+            lines=newLines;
+        }
+        return lines;
     }
 }

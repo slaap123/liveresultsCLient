@@ -2,8 +2,6 @@
 import classes.ParFile;
 import java.awt.FileDialog;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +35,7 @@ public class AtletiekNuPanel extends JPanel {
     private UnzipUtility unzip;
     private String nuid;
     private File baseDir;
+    public final static boolean test=false;
     
     public static AtletiekNuPanel panel;
 
@@ -45,6 +44,7 @@ public class AtletiekNuPanel extends JPanel {
         return panel;
     }
     private AtletiekNuPanel(final JTabbedPane pane,int nuid) {
+        
         System.setProperty("apple.awt.fileDialogForDirectories", "true");
         FileDialog dialog = new FileDialog(MainWindow.mainObj);
         dialog.setMultipleMode(false);
@@ -54,6 +54,7 @@ public class AtletiekNuPanel extends JPanel {
         if(!baseDir.isDirectory()){
             baseDir=baseDir.getParentFile();
         }
+        
         tPane = pane;
         this.nuid=nuid+"";
         parFileNames.setModel(new javax.swing.table.DefaultTableModel(
@@ -101,8 +102,11 @@ public class AtletiekNuPanel extends JPanel {
         tPane.addTab("AteltiekNu", this);
         unzip = new UnzipUtility();
         try {
-            loginHandler = new LoginHandler(this.nuid);
-            UpdateList();
+            if(!AtletiekNuPanel.panel.test){
+                loginHandler = new LoginHandler(this.nuid);
+                UpdateList();
+            }else
+                UpdateListFromLocal();
 
         } catch (Exception ex) {
             Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -116,6 +120,31 @@ public class AtletiekNuPanel extends JPanel {
             loginHandler.getZip(MainWindow.mainObj.wedstrijdId + "");
             unzip.unzip("tmp.zip", baseDir.getPath());
             new File("tmp.zip").delete();
+            ((DefaultTableModel)parFileNames.getModel()).setRowCount(0);
+            for (File fileEntry : baseDir.listFiles()) {
+                if (fileEntry.getName().endsWith("par")) {
+                    ParFile entry=null;
+                    if(parFiles.containsKey(fileEntry.getName())){
+                        entry=parFiles.get(fileEntry.getName());
+                        entry.getValuesFromFile(fileEntry);
+                    }else{
+                        entry=new ParFile(fileEntry);
+                    }
+                    System.out.println("GotResults:"+entry.gotResults);
+                    if(!entry.gotResults){
+                        ((DefaultTableModel)parFileNames.getModel()).addRow(new Object[]{entry.fileName,entry.onderdeel+" "+entry.startgroep,entry.serie});
+                    }
+                    parFiles.put(fileEntry.getName(),entry);
+                }
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    public void UpdateListFromLocal() {
+        try {
             ((DefaultTableModel)parFileNames.getModel()).setRowCount(0);
             for (File fileEntry : baseDir.listFiles()) {
                 if (fileEntry.getName().endsWith("par")) {

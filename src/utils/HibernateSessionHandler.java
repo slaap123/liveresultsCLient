@@ -95,10 +95,14 @@ public class HibernateSessionHandler {
     }
 
     public void save(Object object) {
+        try{
         Session session = getSession();
                 session.beginTransaction();
                 session.saveOrUpdate(object);
                 session.getTransaction().commit();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

@@ -35,6 +35,8 @@ public class ParFile {
     public ArrayList<ParFileEntry> atleten = new ArrayList();
     public boolean gotResults=false;
     public Long resultSize=-1L;
+    public File resultFile=null;
+    
 
     public ParFile() {
 
@@ -79,12 +81,7 @@ public class ParFile {
     
     public void writeValuesToFile(){
         List<String> lines=new ArrayList<String>();
-        lines.add("# startlijst_onderdeel_id:"+startlijst_onderdeel_id);
-        lines.add("# versie:\t\t"+versie);
-        lines.add("# begin_tijd:\t"+begin_tijd);
-        lines.add("# startgroep:\t"+startgroep);
-        lines.add("# onderdeel:\t"+onderdeel);
-        lines.add("# serie:\t\t"+serie);
+        lines.addAll(getHeaderInfo());
         for(ParFileEntry entry : atleten){
             lines.add(entry.startnummer+"\t"+entry.baan+"\t"+entry.naam+"\t"+entry.info);
         }
@@ -93,5 +90,15 @@ public class ParFile {
         } catch (IOException ex) {
             Logger.getLogger(ParFile.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    public ArrayList<String> getHeaderInfo(){
+        ArrayList<String> lines=new ArrayList<String>();
+        lines.add("# startlijst_onderdeel_id:"+startlijst_onderdeel_id);
+        lines.add("# versie:\t\t"+versie);
+        lines.add("# begin_tijd:\t"+begin_tijd);
+        lines.add("# startgroep:\t"+startgroep);
+        lines.add("# onderdeel:\t"+onderdeel);
+        lines.add("# serie:\t\t"+serie);
+        return lines;
     }
 }
