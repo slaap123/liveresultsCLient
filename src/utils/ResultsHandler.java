@@ -1,5 +1,9 @@
+package utils;
+
 
 import classes.ParFile;
+import gui.AtletiekNuPanel;
+import gui.MainWindow;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -18,12 +22,15 @@ import liveresultsclient.entity.Atleten;
 import liveresultsclient.entity.Img;
 import liveresultsclient.entity.Onderdelen;
 import liveresultsclient.entity.Serie;
+import liveresultsclient.entity.Sisresult;
 import liveresultsclient.entity.Uitslagen;
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import utils.HibernateSessionHandler;
 import utils.HibernateUtil;
+
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -34,14 +41,14 @@ import utils.HibernateUtil;
  *
  * @author woutermkievit
  */
-public class resultsHandler extends Thread {
+public class ResultsHandler extends Thread {
 
     private File dir;
-    private Queue uitslagen = new LinkedList();
+    public static Queue uitslagen = new LinkedList();
     private ArrayList<ParFile> files = new ArrayList<ParFile>();
     private HibernateSessionHandler sessionHandler;
 
-    public resultsHandler(File dir) {
+    public ResultsHandler(File dir) {
         this.dir = dir;
     }
 
@@ -69,17 +76,20 @@ public class resultsHandler extends Thread {
                 files.clear();
             } catch (Exception ex) {
                 System.out.println("failed to upload");
-                Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
             if(!AtletiekNuPanel.panel.test){
                 AtletiekNuPanel.panel.UpdateList();
             }
             AtletiekNuPanel.panel.UpdateListFromLocal();
             System.out.println("end reading");
+            //if(!AtletiekNuPanel.panel.test){
+                SaveNewRecords();
+            //}
             try {
                 sleep(2000);
             } catch (InterruptedException ex) {
-                Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
@@ -127,9 +137,11 @@ public class resultsHandler extends Thread {
                 foto.setType("application/octet-stream");
                 foto.setUploadDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             } catch (IOException ex) {
-                Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            uitslagen.add(foto);
+            if(!AtletiekNuPanel.panel.test){
+                uitslagen.add(foto);
+            }
         }
         if (serie == null) {
             serie = new Serie();
@@ -140,7 +152,13 @@ public class resultsHandler extends Thread {
         serie.setImg(foto);
         serie.setOnderdelen(onderdeel);
         serie.setSerieNummer(serieNr);
-        uitslagen.add(serie);
+        
+        if(!Sisresult.starts.empty()&&parFile.startInformatie==null){
+            parFile.startInformatie=Sisresult.starts.pop();
+        }
+        if(!AtletiekNuPanel.panel.test){
+            uitslagen.add(serie);
+        }
         int atleten = 0;
         for (int i = 8; i < lines.size(); i++) {
             String[] split = lines.get(i).replaceAll("\n\r", "").split("\t");
@@ -163,16 +181,19 @@ public class resultsHandler extends Thread {
                 uitslag.setInvoerTijd(new Date());
                 uitslag.setSerieNummer(serieNr);
                 uitslag.setOnderdelen(onderdeel);
-                uitslagen.add(uitslag);
+                if(parFile.startInformatie!=null){
+                    uitslag.setReactieTijd(parFile.startInformatie.getSislane(baan).getReactionTime()+"");
+                    AtletiekNuPanel.panel.jTextPane1.setText("reactie tijd :"+uitslag.getReactieTijd());
+                }
+                if(!AtletiekNuPanel.panel.test){
+                    uitslagen.add(uitslag);
+                }
                 atleten++;
             }
         }
 
         String text = AtletiekNuPanel.panel.jTextPane1.getText();
         AtletiekNuPanel.panel.jTextPane1.setText(file.getName() + " met " + atleten + " atleten\n" + text);
-        if(!AtletiekNuPanel.panel.test){
-            SaveNewRecords();
-        }
     }
 
     private void SaveNewRecords() {
@@ -205,12 +226,12 @@ public class resultsHandler extends Thread {
                 writer.flush();
                 writer.close();
             } catch (IOException ex) {
-                Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     writer.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(resultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             

@@ -7,12 +7,12 @@ package utils;
 
 import java.util.Arrays;
 import java.util.List;
+import liveresultsclient.entity.Sisresult;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-
 
 /**
  *
@@ -21,7 +21,7 @@ import org.hibernate.criterion.Restrictions;
 public class HibernateSessionHandler {
 
     private static HibernateSessionHandler THIS = null;
-    private static boolean openSession=false;
+    private static boolean openSession = false;
     private Session session;
 
     public static HibernateSessionHandler get() {
@@ -30,11 +30,12 @@ public class HibernateSessionHandler {
         }
         return THIS;
     }
-    public Session getSession(){
-        if(!openSession){
+
+    public Session getSession() {
+        if (!openSession) {
             System.out.println("");
-            openSession=true;
-            session=HibernateUtil.getSessionFactory().openSession();
+            openSession = true;
+            session = HibernateUtil.getSessionFactory().openSession();
         }
         return session;
     }
@@ -64,44 +65,53 @@ public class HibernateSessionHandler {
         System.out.println(query);
         return (T) executeHQLQuery(query).get(0);
     }
-    public <T> T getObject(Class<T> T ,String values, String columns) {
-        return this.getObject(T,values.split(","),columns.split(","));
+
+    public <T> T getObject(Class<T> T, String values, String columns) {
+        return this.getObject(T, values.split(","), columns.split(","));
     }
-    
-    public <T> T getObject(Class<T> T ,Object[] values, String[] columns) {
+
+    public <T> T getObject(Class<T> T, Object[] values, String[] columns) {
+        Session session = null;
         try {
-            Session session = getSession();
+            session = getSession();
             session.beginTransaction();
 
             Criteria criteria = session.createCriteria(T);
             for (int i = 0; i < columns.length; i++) {
-                if(columns[i].contains(".")){
+                if (columns[i].contains(".")) {
                     criteria.createAlias(columns[i].split("\\.")[0], columns[i].split("\\.")[0]);
                 }
                 criteria.add(Restrictions.eq(columns[i], values[i]));
             }
-            
-            session.getTransaction().commit();
             List list = criteria.list();
-            
-            System.out.println("found:"+list.size()+" "+T.getName());
-            Object tmp=criteria.uniqueResult();
+
+            System.out.println("found:" + list.size() + " " + T.getName());
+            Object tmp = criteria.uniqueResult();
             return ((T) tmp);
         } catch (HibernateException he) {
             he.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.getTransaction().commit();
+            }
         }
         return null;
-        
+
     }
 
     public void save(Object object) {
-        try{
-        Session session = getSession();
-                session.beginTransaction();
-                session.saveOrUpdate(object);
-                session.getTransaction().commit();
-        }catch(Exception e){
+        System.out.println("saving:" + object.getClass());
+        Session session = null;
+        try {
+            session = getSession();
+            session.beginTransaction();
+            session.saveOrUpdate(object);
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.getTransaction().commit();
+            }
         }
     }
 

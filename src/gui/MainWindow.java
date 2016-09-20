@@ -1,35 +1,27 @@
+package gui;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
-import utils.HibernateUtil;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTable;
-import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import liveresultsclient.entity.Atleten;
 import liveresultsclient.entity.AtletiekNu;
 import liveresultsclient.entity.Onderdelen;
+import liveresultsclient.entity.Sisresult;
 import liveresultsclient.entity.StartLijsten;
 import liveresultsclient.entity.Wedstrijden;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import utils.HibernateSessionHandler;
 
 /**
@@ -116,6 +108,7 @@ public class MainWindow extends javax.swing.JFrame {
                 int modelRow = Integer.valueOf(e.getActionCommand());
                 wedstrijdId = (int) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 4);
                 UpdateGui();
+                Sisresult.startHandler();
                 Tabs.setSelectedIndex(1);
             }
         };

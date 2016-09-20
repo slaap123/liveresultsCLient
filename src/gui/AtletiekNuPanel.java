@@ -1,4 +1,8 @@
+package gui;
 
+
+import classes.LoginHandler;
+import utils.ResultsHandler;
 import classes.ParFile;
 import java.awt.FileDialog;
 import java.io.File;
@@ -35,7 +39,7 @@ public class AtletiekNuPanel extends JPanel {
     private UnzipUtility unzip;
     private String nuid;
     private File baseDir;
-    public final static boolean test=false;
+    public final static boolean test=true;
     
     public static AtletiekNuPanel panel;
 
@@ -111,7 +115,7 @@ public class AtletiekNuPanel extends JPanel {
         } catch (Exception ex) {
             Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        resultsHandler handelr = new resultsHandler(baseDir);
+        ResultsHandler handelr = new ResultsHandler(baseDir);
         handelr.start();
     }
 

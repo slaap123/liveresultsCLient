@@ -1,3 +1,5 @@
+package classes;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -8,6 +10,7 @@
  *
  * @author woutermkievit
  */
+import gui.AtletiekNuPanel;
 import classes.ParFile;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

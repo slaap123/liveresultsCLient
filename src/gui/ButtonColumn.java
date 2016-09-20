@@ -1,3 +1,5 @@
+package gui;
+
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,7 +20,7 @@ import javax.swing.table.*;
  * number of the button that was clicked.
  *
  */
-public class CheckboxColumn extends AbstractCellEditor
+public class ButtonColumn extends AbstractCellEditor
         implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
 
     private JTable table;
@@ -27,10 +29,11 @@ public class CheckboxColumn extends AbstractCellEditor
     private Border originalBorder;
     private Border focusBorder;
 
-    private JCheckBox renderBox;
-    private JCheckBox editBox;
+    private JButton renderButton;
+    private JButton editButton;
     private Object editorValue;
     private boolean isButtonColumnEditor;
+    private String text = null;
 
     /**
      * Create the ButtonColumn to be used as a renderer and editor. The renderer
@@ -41,14 +44,19 @@ public class CheckboxColumn extends AbstractCellEditor
      * @param action the Action to be invoked when the button is invoked
      * @param column the column to which the button renderer/editor is added
      */
-    public CheckboxColumn(JTable table, Action action, int column) {
+    public ButtonColumn(JTable table, Action action, int column) {
+        this(table, action, column, null);
+    }
+
+    public ButtonColumn(JTable table, Action action, int column, String text) {
         this.table = table;
         this.action = action;
-        renderBox = new JCheckBox();
-        editBox = new JCheckBox();
-        editBox.setFocusPainted(false);
-        editBox.addActionListener(this);
-        originalBorder = editBox.getBorder();
+        this.text = text;
+        renderButton = new JButton();
+        editButton = new JButton();
+        editButton.setFocusPainted(false);
+        editButton.addActionListener(this);
+        originalBorder = editButton.getBorder();
         setFocusBorder(new LineBorder(Color.BLUE));
 
         TableColumnModel columnModel = table.getColumnModel();
@@ -73,7 +81,7 @@ public class CheckboxColumn extends AbstractCellEditor
      */
     public void setFocusBorder(Border focusBorder) {
         this.focusBorder = focusBorder;
-        editBox.setBorder(focusBorder);
+        editButton.setBorder(focusBorder);
     }
 
     public int getMnemonic() {
@@ -87,23 +95,29 @@ public class CheckboxColumn extends AbstractCellEditor
      */
     public void setMnemonic(int mnemonic) {
         this.mnemonic = mnemonic;
-        renderBox.setMnemonic(mnemonic);
-        editBox.setMnemonic(mnemonic);
+        renderButton.setMnemonic(mnemonic);
+        editButton.setMnemonic(mnemonic);
     }
 
     @Override
     public Component getTableCellEditorComponent(
             JTable table, Object value, boolean isSelected, int row, int column) {
-        if (value == null) {
-            editBox.setSelected(false);
-            editBox.setIcon(null);
+        if (text != null) {
+            editButton.setText(text);
+            editButton.setIcon(null);
+        } else if (value == null) {
+            editButton.setText("");
+            editButton.setIcon(null);
+        } else if (value instanceof Icon) {
+            editButton.setText("");
+            editButton.setIcon((Icon) value);
         } else {
-            editBox.setSelected((Boolean)value);
-            editBox.setIcon(null);
+            editButton.setText(value.toString());
+            editButton.setIcon(null);
         }
 
         this.editorValue = value;
-        return editBox;
+        return editButton;
     }
 
     @Override
@@ -117,28 +131,34 @@ public class CheckboxColumn extends AbstractCellEditor
     public Component getTableCellRendererComponent(
             JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         if (isSelected) {
-            renderBox.setForeground(table.getSelectionForeground());
-            renderBox.setBackground(table.getSelectionBackground());
+            renderButton.setForeground(table.getSelectionForeground());
+            renderButton.setBackground(table.getSelectionBackground());
         } else {
-            renderBox.setForeground(table.getForeground());
-            renderBox.setBackground(UIManager.getColor("Button.background"));
+            renderButton.setForeground(table.getForeground());
+            renderButton.setBackground(UIManager.getColor("Button.background"));
         }
 
         if (hasFocus) {
-            renderBox.setBorder(focusBorder);
+            renderButton.setBorder(focusBorder);
         } else {
-            renderBox.setBorder(originalBorder);
+            renderButton.setBorder(originalBorder);
         }
         
-        if (value == null) {
-            renderBox.setSelected(false);
-            renderBox.setIcon(null);
+        if (text != null) {
+            renderButton.setText(text);
+            renderButton.setIcon(null);
+        } else if (value == null) {
+            renderButton.setText("");
+            renderButton.setIcon(null);
+        } else if (value instanceof Icon) {
+            renderButton.setText("");
+            renderButton.setIcon((Icon) value);
         } else {
-            renderBox.setSelected((Boolean)value);
-            renderBox.setIcon(null);
+            renderButton.setText(value.toString());
+            renderButton.setIcon(null);
         }
 
-        return renderBox;
+        return renderButton;
     }
 
 //

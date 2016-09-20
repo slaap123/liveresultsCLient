@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import liveresultsclient.entity.Sisresult;
 
 /**
  *
@@ -36,6 +37,7 @@ public class ParFile {
     public boolean gotResults=false;
     public Long resultSize=-1L;
     public File resultFile=null;
+    public Sisresult startInformatie=null;
     
 
     public ParFile() {
