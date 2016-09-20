@@ -41,5 +41,11 @@
             </key>
             <one-to-many class="liveresultsclient.entity.AtletiekNu" />
         </set>
+        <set name="sisresults" table="SISResult" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="wedstridj_id" not-null="true" />
+            </key>
+            <one-to-many class="liveresultsclient.entity.Sisresult" />
+        </set>
     </class>
 </hibernate-mapping>

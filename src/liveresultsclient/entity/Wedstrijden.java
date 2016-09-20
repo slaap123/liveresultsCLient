@@ -21,6 +21,7 @@ public class Wedstrijden  implements java.io.Serializable {
      private Set onderdelens = new HashSet(0);
      private Set atletens = new HashSet(0);
      private Set atletiekNus = new HashSet(0);
+     private Set sisresults = new HashSet(0);
 
     public Wedstrijden() {
     }
@@ -102,6 +103,14 @@ public class Wedstrijden  implements java.io.Serializable {
     
     public void setAtletiekNus(Set atletiekNus) {
         this.atletiekNus = atletiekNus;
+    }
+    
+    public Set getSisresults() {
+        return this.sisresults;
+    }
+    
+    public void setSisresults(Set sisresults) {
+        this.sisresults = sisresults;
     }
 
 

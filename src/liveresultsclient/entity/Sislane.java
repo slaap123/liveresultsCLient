@@ -41,7 +41,7 @@ public class Sislane  implements java.io.Serializable {
     public Integer tryParse(Object obj) {
         Integer retVal;
         try {
-            retVal = Integer.parseInt((String) obj);
+            retVal = Integer.parseInt(((String) obj).trim());
         } catch (NumberFormatException nfe) {
             retVal = 0; // or null if that is your preference
         }

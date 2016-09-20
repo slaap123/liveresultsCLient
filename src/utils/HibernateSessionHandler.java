@@ -6,12 +6,14 @@
 package utils;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import liveresultsclient.entity.Sisresult;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -113,6 +115,29 @@ public class HibernateSessionHandler {
                 session.getTransaction().commit();
             }
         }
+    }
+    
+    public Sisresult getClossedSisResult(int wedstrijdID,Date date) {
+        Session session = null;
+        Sisresult re=null;
+        try {
+            session = getSession();
+            session.beginTransaction();
+            Criteria criteria = session.createCriteria(Sisresult.class);
+            criteria.add(Restrictions.eq("wedstrijden.id", wedstrijdID));
+            criteria.add(Restrictions.le("time", date));
+            criteria.addOrder(Order.desc("time") );
+            if(criteria.list().size()>0){
+                re=(Sisresult)criteria.list().get(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.getTransaction().commit();
+            }
+        }
+        return re;
     }
 
 }

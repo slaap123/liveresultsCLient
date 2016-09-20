@@ -20,6 +20,12 @@
         <property name="starterName" type="string">
             <column name="starterName" length="5" not-null="true" />
         </property>
+        <many-to-one name="wedstrijden" class="liveresultsclient.entity.Wedstrijden" fetch="select">
+            <column name="wedstridj_id" not-null="true" />
+        </many-to-one>
+        <property name="time" type="timestamp">
+            <column name="time" length="19" not-null="true" />
+        </property>
         <set name="sislanes" table="SISLane" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="SISResult_id" />

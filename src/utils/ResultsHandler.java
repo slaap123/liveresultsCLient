@@ -1,6 +1,5 @@
 package utils;
 
-
 import classes.ParFile;
 import gui.AtletiekNuPanel;
 import gui.MainWindow;
@@ -10,11 +9,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,8 +31,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import utils.HibernateSessionHandler;
 import utils.HibernateUtil;
-
-
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -62,14 +62,14 @@ public class ResultsHandler extends Thread {
                     ParFile parFile = AtletiekNuPanel.panel.parFiles.get(fileEntry.getName().replace("txt", "par"));
                     if (parFile != null && parFile.resultSize != fileEntry.length()) {
                         readResults(fileEntry, parFile);
-                        parFile.resultFile=fileEntry;
+                        parFile.resultFile = fileEntry;
                         parFile.gotResults = true;
                         files.add(parFile);
                     }
                 }
             }
             try {
-                if(!AtletiekNuPanel.panel.test&&files.size()>0){
+                if (!AtletiekNuPanel.panel.test && files.size() > 0) {
                     AtletiekNuPanel.panel.loginHandler.submitResults(files);
                 }
                 System.out.println("upload");
@@ -78,13 +78,13 @@ public class ResultsHandler extends Thread {
                 System.out.println("failed to upload");
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if(!AtletiekNuPanel.panel.test){
+            if (!AtletiekNuPanel.panel.test) {
                 AtletiekNuPanel.panel.UpdateList();
             }
             AtletiekNuPanel.panel.UpdateListFromLocal();
             System.out.println("end reading");
             //if(!AtletiekNuPanel.panel.test){
-                SaveNewRecords();
+            SaveNewRecords();
             //}
             try {
                 sleep(2000);
@@ -127,7 +127,7 @@ public class ResultsHandler extends Thread {
             if (serie != null) {
                 foto = serie.getImg();
             }
-            if(foto==null){
+            if (foto == null) {
                 foto = new Img();
             }
             try {
@@ -139,7 +139,7 @@ public class ResultsHandler extends Thread {
             } catch (IOException ex) {
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if(!AtletiekNuPanel.panel.test){
+            if (!AtletiekNuPanel.panel.test) {
                 uitslagen.add(foto);
             }
         }
@@ -147,16 +147,22 @@ public class ResultsHandler extends Thread {
             serie = new Serie();
         }
         ArrayList<String> lines = new ArrayList<String>(Arrays.asList(content.split("\n")));
-        lines=CheckResultsFile(file, parFile, lines);
+        lines = CheckResultsFile(file, parFile, lines);
         serie.setWind(lines.get(0).split("\t")[1]);
         serie.setImg(foto);
         serie.setOnderdelen(onderdeel);
         serie.setSerieNummer(serieNr);
-        
-        if(!Sisresult.starts.empty()&&parFile.startInformatie==null){
-            parFile.startInformatie=Sisresult.starts.pop();
+
+        if (parFile.startInformatie == null) {
+            try {
+                DateFormat format = new SimpleDateFormat("d-M-yyyy - HH:mm:ss", Locale.ENGLISH);
+                Date date = format.parse(lines.get(0).split("\t")[4]);
+                parFile.startInformatie = sessionHandler.getClossedSisResult(MainWindow.mainObj.wedstrijdId, date);
+            } catch (ParseException ex) {
+                Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        if(!AtletiekNuPanel.panel.test){
+        if (!AtletiekNuPanel.panel.test) {
             uitslagen.add(serie);
         }
         int atleten = 0;
@@ -181,11 +187,12 @@ public class ResultsHandler extends Thread {
                 uitslag.setInvoerTijd(new Date());
                 uitslag.setSerieNummer(serieNr);
                 uitslag.setOnderdelen(onderdeel);
-                if(parFile.startInformatie!=null){
-                    uitslag.setReactieTijd(parFile.startInformatie.getSislane(baan).getReactionTime()+"");
-                    AtletiekNuPanel.panel.jTextPane1.setText("reactie tijd :"+uitslag.getReactieTijd());
+                if (parFile.startInformatie != null) {
+                    System.out.println("baan:"+parFile.startInformatie.getSislane(baan).getReactionTime());
+                    uitslag.setReactieTijd(parFile.startInformatie.getSislane(baan).getReactionTime() + "");
+                    AtletiekNuPanel.panel.jTextPane1.setText("reactie tijd :" + uitslag.getReactieTijd());
                 }
-                if(!AtletiekNuPanel.panel.test){
+                if (!AtletiekNuPanel.panel.test) {
                     uitslagen.add(uitslag);
                 }
                 atleten++;
@@ -203,7 +210,7 @@ public class ResultsHandler extends Thread {
                 sessionHandler.save(uitslagen.poll());
             } catch (HibernateException he) {
                 he.printStackTrace();
-            }catch (AssertionFailure he){
+            } catch (AssertionFailure he) {
                 he.printStackTrace();
             }
         }
@@ -215,12 +222,13 @@ public class ResultsHandler extends Thread {
             newLines.addAll(lines);
             newLines.addAll(1, parFile.getHeaderInfo());
             FileWriter writer = null;
-            
+
             try {
                 writer = new FileWriter(file.getAbsolutePath());
                 for (int i = 0; i < newLines.size(); i++) {
-                    if(i>0)
+                    if (i > 0) {
                         writer.append(System.getProperty("line.separator"));
+                    }
                     writer.append(newLines.get(i));
                 }
                 writer.flush();
@@ -234,10 +242,10 @@ public class ResultsHandler extends Thread {
                     Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            
+
             file = new File(file.getAbsolutePath());
             parFile.resultSize = file.length();
-            lines=newLines;
+            lines = newLines;
         }
         return lines;
     }

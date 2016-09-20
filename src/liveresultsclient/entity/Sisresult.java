@@ -1,6 +1,8 @@
 package liveresultsclient.entity;
 // Generated Sep 19, 2016 7:42:13 PM by Hibernate Tools 4.3.1
 
+import gui.MainWindow;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -25,8 +27,11 @@ public class Sisresult implements java.io.Serializable {
     private String raceName;
     private String starterName;
     private Set sislanes = new HashSet(0);
+    private Wedstrijden wedstrijden;
     public String rawData = null;
+    private Date time;
     public static Stack<Sisresult> starts = new Stack<Sisresult>();
+    private static HibernateSessionHandler sessionHandler;
 
     public Sisresult() {
     }
@@ -103,6 +108,22 @@ public class Sisresult implements java.io.Serializable {
     public void setSislanes(Set sislanes) {
         this.sislanes = sislanes;
     }
+    
+    public Wedstrijden getWedstrijden() {
+        return this.wedstrijden;
+    }
+    
+    public void setWedstrijden(Wedstrijden wedstrijden) {
+        this.wedstrijden = wedstrijden;
+    }
+    
+    public Date getTime() {
+        return this.time;
+    }
+    
+    public void setTime(Date time) {
+        this.time = time;
+    }
 
     public static void startHandler() {
         if (SerialPortList.getPortNames().length > 0) {
@@ -114,6 +135,7 @@ public class Sisresult implements java.io.Serializable {
 
     public static void handeleResult(byte[] bytes) {
         buffer += new String(bytes);
+        sessionHandler = HibernateSessionHandler.get();
         //System.out.println(buffer.replace("\n", "\\n\n").replace("\r", "\\n\r").replace("\t", "\\n\t"));
 
         if ((int) buffer.substring(buffer.length() - 1).charAt(0) == 3) {
@@ -146,6 +168,8 @@ public class Sisresult implements java.io.Serializable {
                         result.setStarterName(lines[lastLine + 3].split(":")[1].trim());
                         result.headN = Integer.parseInt(lines[lastLine + 4].split(":")[1].trim());
                         result.raceName = lines[lastLine + 5].split(":")[1].trim();
+                        result.setTime(new Date());
+                        result.setWedstrijden((Wedstrijden)sessionHandler.getObject(Wedstrijden.class, new Object[]{MainWindow.mainObj.wedstrijdId}, new String[]{"id"}));
                         starts.add(result);
                         
                         ResultsHandler.uitslagen.add(result);
