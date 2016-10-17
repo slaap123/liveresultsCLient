@@ -5,7 +5,6 @@ package classes;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author woutermkievit
@@ -67,7 +66,7 @@ public class LoginHandler {
     }
 
     public void getZip(String id) throws Exception {
-        String url = "https://www.atletiek.nu/feeder.php?page=exportstartlijstentimetronics&event_id=" + nuid+"&forceAlleenGeprinteLijsten=1";
+        String url = "https://www.atletiek.nu/feeder.php?page=exportstartlijstentimetronics&event_id=" + nuid + "&forceAlleenGeprinteLijsten=1";
         System.out.println(url);
         HttpGet request = new HttpGet(url);
 
@@ -118,14 +117,22 @@ public class LoginHandler {
 
         System.out.println("Response Code submit: " + responseCode);
         HttpEntity responseEntity = response.getEntity();
-        String responseString="";
+        String responseString = "";
         if (responseEntity != null) {
             responseString = EntityUtils.toString(responseEntity);
         }
-        JSONObject obj=new JSONObject(responseString);
-        for(Object FileObj: (JSONArray)obj.get("files")){
-            JSONObject JSONFile=(JSONObject)FileObj;
-            AtletiekNuPanel.panel.jTextPane1.setText("Uploaded "+JSONFile.get("name")+" met "+JSONFile.get("totaalverwerkt")+" atleten");
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(responseString);
+        } catch (Exception e) {
+            System.out.println(responseString);
+        }
+        if (obj != null) {
+            for (Object FileObj : (JSONArray) obj.get("files")) {
+                JSONObject JSONFile = (JSONObject) FileObj;
+                String text = AtletiekNuPanel.panel.jTextPane1.getText();
+                AtletiekNuPanel.panel.jTextPane1.setText("Uploaded " + JSONFile.get("name") + " met " + JSONFile.get("totaalverwerkt") + " atleten\n" + text);
+            }
         }
         // set cookies
         setCookies(response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString());

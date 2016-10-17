@@ -127,6 +127,7 @@ public class Sisresult implements java.io.Serializable {
 
     public static void startHandler() {
         if (SerialPortList.getPortNames().length > 0) {
+            System.out.println("got SERIAL!!!!");
             SerialHandler serial = new SerialHandler(SerialPortList.getPortNames()[0] + "");
             serial.setHandleEvent(Sisresult.class, "handeleResult");
         }

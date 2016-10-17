@@ -26,13 +26,13 @@
         <property name="vereniging" type="string">
             <column name="Vereniging" not-null="true" />
         </property>
-        <set name="uitslagens" table="Uitslagen" inverse="true" lazy="true" fetch="select">
+        <set cascade="save-update" name="uitslagens" table="Uitslagen" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="AtleetID" not-null="true" />
             </key>
             <one-to-many class="liveresultsclient.entity.Uitslagen" />
         </set>
-        <set name="startLijstens" table="StartLijsten" inverse="true" lazy="true" fetch="select">
+        <set cascade="save-update" name="startLijstens" table="StartLijsten" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="AtleetID" not-null="true" />
             </key>

@@ -8,6 +8,9 @@ package utils;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import liveresultsclient.entity.Onderdelen;
 import liveresultsclient.entity.Sisresult;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -85,6 +88,7 @@ public class HibernateSessionHandler {
                 }
                 criteria.add(Restrictions.eq(columns[i], values[i]));
             }
+            System.out.println("search for "+T.getName());
             List list = criteria.list();
 
             System.out.println("found:" + list.size() + " " + T.getName());
@@ -138,6 +142,21 @@ public class HibernateSessionHandler {
             }
         }
         return re;
+    }
+
+    public void delete(Object object) {
+        Session session = null;
+        try {
+            session = getSession();
+            session.beginTransaction();
+            session.delete(object);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.getTransaction().commit();
+            }
+        }
     }
 
 }

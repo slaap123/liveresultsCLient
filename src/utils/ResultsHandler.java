@@ -2,6 +2,7 @@ package utils;
 
 import classes.ParFile;
 import gui.AtletiekNuPanel;
+import gui.ResultsPanel;
 import gui.MainWindow;
 import java.io.File;
 import java.io.FileReader;
@@ -26,6 +27,7 @@ import liveresultsclient.entity.Onderdelen;
 import liveresultsclient.entity.Serie;
 import liveresultsclient.entity.Sisresult;
 import liveresultsclient.entity.Uitslagen;
+import liveresultsclient.entity.Wedstrijden;
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -59,7 +61,7 @@ public class ResultsHandler extends Thread {
             System.out.println("start reading");
             for (File fileEntry : dir.listFiles()) {
                 if (fileEntry.getName().endsWith("txt")) {
-                    ParFile parFile = AtletiekNuPanel.panel.parFiles.get(fileEntry.getName().replace("txt", "par"));
+                    ParFile parFile = ResultsPanel.panel.parFiles.get(fileEntry.getName().replace("txt", "par"));
                     if (parFile != null && parFile.resultSize != fileEntry.length()) {
                         readResults(fileEntry, parFile);
                         parFile.resultFile = fileEntry;
@@ -69,25 +71,23 @@ public class ResultsHandler extends Thread {
                 }
             }
             try {
-                if (!AtletiekNuPanel.panel.test && files.size() > 0) {
-                    AtletiekNuPanel.panel.loginHandler.submitResults(files);
+                if (ResultsPanel.panel.live && files.size() > 0&&ResultsPanel.panel.getClass()==AtletiekNuPanel.class){
+                    ((AtletiekNuPanel)ResultsPanel.panel).loginHandler.submitResults(files);
+                    System.out.println("upload");
                 }
-                System.out.println("upload");
                 files.clear();
             } catch (Exception ex) {
                 System.out.println("failed to upload");
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (!AtletiekNuPanel.panel.test) {
-                AtletiekNuPanel.panel.UpdateList();
-            }
-            AtletiekNuPanel.panel.UpdateListFromLocal();
+            
+            ResultsPanel.panel.UpdateList();
             System.out.println("end reading");
-            //if(!AtletiekNuPanel.panel.test){
+            //if(!ResultsPanel.panel.test){
             SaveNewRecords();
             //}
             try {
-                sleep(2000);
+                sleep(10000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -117,10 +117,16 @@ public class ResultsHandler extends Thread {
                 }
             }
         }
-        Onderdelen onderdeel = sessionHandler.getObject(Onderdelen.class, new Object[]{parFile.startlijst_onderdeel_id}, new String[]{"externalId"});
+        Onderdelen onderdeel = sessionHandler.getObject(Onderdelen.class, new Object[]{parFile.startlijst_onderdeel_id}, new String[]{ResultsPanel.panel.indentifingColumnName});
+        if (onderdeel == null) {
+            System.out.println("Geen Onderdeel!!!");
+            return;
+        }
         int serieNr = Integer.parseInt(parFile.serie.replaceAll("[\n\r ]", ""));
         Serie serie = sessionHandler.getObject(Serie.class, new Object[]{onderdeel, serieNr}, new String[]{"onderdelen", "serieNummer"});
-
+        if (serie == null) {
+            serie = new Serie();
+        }
         File jpg = new File(file.getAbsolutePath().replace("txt", "jpg"));
         Img foto = null;
         if (jpg.exists()) {
@@ -139,13 +145,9 @@ public class ResultsHandler extends Thread {
             } catch (IOException ex) {
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (!AtletiekNuPanel.panel.test) {
-                uitslagen.add(foto);
-            }
+            PrioSaveNewRecord(foto);
         }
-        if (serie == null) {
-            serie = new Serie();
-        }
+
         ArrayList<String> lines = new ArrayList<String>(Arrays.asList(content.split("\n")));
         lines = CheckResultsFile(file, parFile, lines);
         serie.setWind(lines.get(0).split("\t")[1]);
@@ -155,16 +157,16 @@ public class ResultsHandler extends Thread {
 
         if (parFile.startInformatie == null) {
             try {
+                
                 DateFormat format = new SimpleDateFormat("d-M-yyyy - HH:mm:ss", Locale.ENGLISH);
                 Date date = format.parse(lines.get(0).split("\t")[4]);
                 parFile.startInformatie = sessionHandler.getClossedSisResult(MainWindow.mainObj.wedstrijdId, date);
+                System.out.println(parFile.startInformatie.getTime());
             } catch (ParseException ex) {
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        if (!AtletiekNuPanel.panel.test) {
-            uitslagen.add(serie);
-        }
+        uitslagen.add(serie);
         int atleten = 0;
         for (int i = 8; i < lines.size(); i++) {
             String[] split = lines.get(i).replaceAll("\n\r", "").split("\t");
@@ -175,7 +177,6 @@ public class ResultsHandler extends Thread {
                     baan = Integer.parseInt(split[1]);
                 }
                 uitslag = sessionHandler.getObject(Uitslagen.class, new Object[]{serieNr, onderdeel.getId(), Integer.parseInt(split[3])}, new String[]{"serieNummer", "onderdelen.id", "atleten.startnummer"});
-
                 if (uitslag == null) {
                     uitslag = new Uitslagen();
                 }
@@ -183,31 +184,56 @@ public class ResultsHandler extends Thread {
                 uitslag.setBaan(baan);
                 uitslag.setResultaat(split[2]);
                 Atleten atleet = sessionHandler.getObject(Atleten.class, new Object[]{Integer.parseInt(split[3]), MainWindow.mainObj.wedstrijdId}, new String[]{"startnummer", "wedstrijden.id"});
+                if (atleet == null) {
+                    atleet = new Atleten();
+                    atleet.setNaam(split[4]);
+                    atleet.setVereniging("unknown vereniging");
+                    atleet.setStartnummer(Integer.parseInt(split[3]));
+                    Wedstrijden weds = sessionHandler.getObject(Wedstrijden.class, new Object[]{MainWindow.mainObj.wedstrijdId}, new String[]{"id"});
+                    atleet.setWedstrijden(weds);
+                    PrioSaveNewRecord(atleet);
+                }
                 uitslag.setAtleten(atleet);
                 uitslag.setInvoerTijd(new Date());
                 uitslag.setSerieNummer(serieNr);
                 uitslag.setOnderdelen(onderdeel);
                 if (parFile.startInformatie != null) {
-                    System.out.println("baan:"+parFile.startInformatie.getSislane(baan).getReactionTime());
+                    System.out.println("baan:" + parFile.startInformatie.getSislane(baan).getReactionTime());
                     uitslag.setReactieTijd(parFile.startInformatie.getSislane(baan).getReactionTime() + "");
-                    AtletiekNuPanel.panel.jTextPane1.setText("reactie tijd :" + uitslag.getReactieTijd());
+                    String text = ResultsPanel.panel.jTextPane1.getText();
+                    ResultsPanel.panel.jTextPane1.setText("reactie tijd :" + uitslag.getReactieTijd() + "\n" + text);
                 }
-                if (!AtletiekNuPanel.panel.test) {
-                    uitslagen.add(uitslag);
-                }
+
+                uitslagen.add(uitslag);
+
                 atleten++;
             }
         }
 
-        String text = AtletiekNuPanel.panel.jTextPane1.getText();
-        AtletiekNuPanel.panel.jTextPane1.setText(file.getName() + " met " + atleten + " atleten\n" + text);
+        String text = ResultsPanel.panel.jTextPane1.getText();
+        ResultsPanel.panel.jTextPane1.setText(file.getName() + " met " + atleten + " atleten\n" + text);
     }
 
     private void SaveNewRecords() {
         while (!uitslagen.isEmpty()) {
+            if (!ResultsPanel.panel.test) {
+                try {
+                    System.out.println("saving: " + uitslagen.peek().getClass().getName());
+                    sessionHandler.save(uitslagen.poll());
+                } catch (HibernateException he) {
+                    he.printStackTrace();
+                } catch (AssertionFailure he) {
+                    he.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void PrioSaveNewRecord(Object obj) {
+        if (!ResultsPanel.panel.test) {
             try {
-                System.out.println("saving: " + uitslagen.peek().getClass().getName());
-                sessionHandler.save(uitslagen.poll());
+                System.out.println("saving: " + obj.getClass().getName());
+                sessionHandler.save(obj);
             } catch (HibernateException he) {
                 he.printStackTrace();
             } catch (AssertionFailure he) {
@@ -217,7 +243,9 @@ public class ResultsHandler extends Thread {
     }
 
     private ArrayList<String> CheckResultsFile(File file, ParFile parFile, ArrayList<String> lines) {
+        
         if (!lines.get(1).startsWith("#")) {
+            System.out.println("addHeaderINFO!!!!");
             ArrayList<String> newLines = new ArrayList<String>();
             newLines.addAll(lines);
             newLines.addAll(1, parFile.getHeaderInfo());

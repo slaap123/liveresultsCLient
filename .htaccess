@@ -1,0 +1,137 @@
+Options +FollowSymLinks
+
+RewriteEngine On
+RewriteBase /
+
+#live results #
+rewriterule ^liveresults/(\d+)$ /liveresults/$1/ [NC,R,L]
+rewriterule ^liveresults$ /liveresults/ [NC,R,L]
+RewriteRule ^liveresults/(\d+)/$ /uploads/pages/phanosGroepsAnalyse/liveresults/LiveResults.php?tmp=x&wedstrijdId=$1 [NC,L]
+RewriteRule ^liveresults/\d+/(.*)$ /uploads/pages/phanosGroepsAnalyse/liveresults/$1 [NC,L]
+RewriteRule ^liveresults/(.*)$ /uploads/pages/phanosGroepsAnalyse/liveresults/$1 [NC,L]
+
+# link naar externe website #
+RewriteRule ^wedstrijden/(.*)$ http://www.amsterdamlooptharder.nl/_phanos/wedstrijden/$1
+RewriteRule ^boscross(.*)$ http://www.phanosboscross.nl/$1
+RewriteRule ^bosloop(.*)$ http://www.phanosbosloop.nl/$1
+RewriteRule ^polderloop(.*)$ http://www.vupolderloop.nl/$1
+RewriteRule ^olympischstadionloop(.*)$ http://www.olympischstadionloop.nl/$1
+RewriteRule ^urbanathletics(.*)$ http://www.amsterdamlooptharder.nl [R]
+RewriteRule ^pages/207/johan-cruyff-legacy-run(.*)$ http://www.fridaynightrun.nl [R]
+RewriteRule ^pages/207/cruyff-foundation-14k(.*)$ http://www.fridaynightrun.nl [R]
+
+# link maar interne pagina #
+RewriteRule ^alv(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=144 [R]
+RewriteRule ^clubkampioenschap(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=111 [R]
+RewriteRule ^cdjunindoor(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=195 [R]
+RewriteRule ^cdjuniorenindoor(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=195 [R]
+RewriteRule ^dspelen(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=123 [R]
+RewriteRule ^gcompetitie(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=197 [R]
+RewriteRule ^hardlopen(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=85 [R]
+RewriteRule ^jeugdcursus(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=175 [R]
+RewriteRule ^kidsindoor(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=195 [R]
+RewriteRule ^loopcursus(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=79 [R]
+RewriteRule ^sprinthordeindoor(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=194 [R]
+RewriteRule ^starttorun(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=138 [R]
+RewriteRule ^s2r(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=138 [R]
+RewriteRule ^pupillenindoor(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=195 [R]
+RewriteRule ^pupcompetitie(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=198 [R]
+RewriteRule ^pupillencompetitie(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=198 [R]
+RewriteRule ^records(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=38 [R]
+RewriteRule ^marathoncursus(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=167 [R]
+RewriteRule ^werpwedstrijd(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=199 [R]
+RewriteRule ^wedstrijden(.*)$ https://www.phanos.amsterdam/default.aspx?PageID=25 [R]
+
+# Van evenement naar pagina #
+# Clubkampioenschappen #
+RewriteCond %{QUERY_STRING} ^eventid=314$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=111 [R=302,L]
+# Amsterdams Scholenkampioenschappen Atletiek #
+RewriteCond %{QUERY_STRING} ^eventid=378$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=184 [R=302,L]
+# 22-10 Boekpresentatie #
+RewriteCond %{QUERY_STRING} ^eventid=61$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/pages/2/nieuws/?newsID=1845 [R=302,L]
+# 27-10 Ledenvergadering ALV #
+RewriteCond %{QUERY_STRING} ^eventid=119$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=144 [R=302,L]
+# Pupillen Indoor #
+RewriteCond %{QUERY_STRING} ^eventid=392$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=195 [R=302,L]
+# D-spelen #
+RewriteCond %{QUERY_STRING} ^eventid=373$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=123 [R=302,L]
+# G-competitie #
+RewriteCond %{QUERY_STRING} ^eventid=424$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=197 [R=302,L]
+# Cursus voorjaarsmarathon #
+RewriteCond %{QUERY_STRING} ^eventid=205$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=202 [R=302,L]
+
+
+# Fridaynightrun extra #
+RewriteCond %{QUERY_STRING} ^eventid=41$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun januari #
+RewriteCond %{QUERY_STRING} ^eventid=42$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun februari #
+RewriteCond %{QUERY_STRING} ^eventid=43$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun maart #
+RewriteCond %{QUERY_STRING} ^eventid=44$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun april #
+RewriteCond %{QUERY_STRING} ^eventid=45$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun mei #
+RewriteCond %{QUERY_STRING} ^eventid=46$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun juni #
+RewriteCond %{QUERY_STRING} ^eventid=47$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun juli #
+RewriteCond %{QUERY_STRING} ^eventid=48$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun augustus #
+RewriteCond %{QUERY_STRING} ^eventid=49$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun september #
+RewriteCond %{QUERY_STRING} ^eventid=50$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun oktober #
+RewriteCond %{QUERY_STRING} ^eventid=51$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun november #
+RewriteCond %{QUERY_STRING} ^eventid=52$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+# Fridaynightrun december #
+RewriteCond %{QUERY_STRING} ^eventid=53$
+RewriteRule ^pages/7/evenementgegevens/$ https://www.phanos.amsterdam/default.aspx?PageID=183 [R=302,L]
+
+# Van evenement naar website #
+# Amsterdam Loopt Harder#
+# Olympisch Stadionloop OSL #
+RewriteCond %{QUERY_STRING} ^eventid=368$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.olympischstadionloop.nl/? [R=302,L]
+# Vondelparkloop VPL #
+RewriteCond %{QUERY_STRING} ^eventid=388$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.vondelparkloop.nl/? [R=302,L]
+RewriteCond %{QUERY_STRING} ^eventid=389$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.vondelparkloop.nl/? [R=302,L]
+# Phanos Boscross en Bosloop #
+RewriteCond %{QUERY_STRING} ^eventid=391$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.phanosboscross.nl/? [R=302,L]
+# Phanos VU Polderloop #
+RewriteCond %{QUERY_STRING} ^eventid=312$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.vupolderloop.nl/? [R=302,L]
+
+# Polsstokhoogwedstrijd #
+RewriteCond %{QUERY_STRING} ^eventid=390$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.polsstokspringenamsterdam.nl/? [R=302,L]
+# Indoor Amsterdam #
+RewriteCond %{QUERY_STRING} ^eventid=393$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.indooramsterdam.nl/? [R=302,L]
+RewriteCond %{QUERY_STRING} ^eventid=423$
+RewriteRule ^pages/7/evenementgegevens/$ http://www.indooramsterdam.nl/? [R=302,L]
+

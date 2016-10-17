@@ -5,7 +5,16 @@ import utils.ResultsHandler;
 import classes.ParFile;
 import java.awt.FileDialog;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
@@ -14,6 +23,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
+import liveresultsclient.entity.Onderdelen;
+import liveresultsclient.entity.StartLijsten;
+import utils.HibernateSessionHandler;
 import utils.UnzipUtility;
 
 /*
@@ -25,28 +37,26 @@ import utils.UnzipUtility;
  *
  * @author woutermkievit
  */
-public class AtletiekNuPanel extends ResultsPanel {
+public class LiveResultsPanel extends ResultsPanel {
 
     private javax.swing.JSplitPane jSplitPane1 = new javax.swing.JSplitPane();
-    public javax.swing.JTextPane jTextPane1 = new JTextPane();
     private javax.swing.JTable parFileNames = new JTable();
     private javax.swing.JScrollPane jScrollPane4 = new JScrollPane();
     private javax.swing.JScrollPane jScrollPane5 = new JScrollPane();
     private JTabbedPane tPane;
     public LoginHandler loginHandler;
     private UnzipUtility unzip;
-    private String nuid;
     private File baseDir;
 
-    public static ResultsPanel GetAtletiekNuPanel(final JTabbedPane pane, int nuid) {
-        if (panel != null) {
-            panel = new AtletiekNuPanel(pane, nuid);
-            indentifingColumnName = "externalId";
+    public static ResultsPanel GetAtletiekNuPanel(final JTabbedPane pane) {
+        if (panel == null) {
+            panel = new LiveResultsPanel(pane);
+            indentifingColumnName = "id";
         }
         return panel;
     }
 
-    private AtletiekNuPanel(final JTabbedPane pane, int nuid) {
+    private LiveResultsPanel(final JTabbedPane pane) {
 
         System.setProperty("apple.awt.fileDialogForDirectories", "true");
         FileDialog dialog = new FileDialog(MainWindow.mainObj);
@@ -59,7 +69,6 @@ public class AtletiekNuPanel extends ResultsPanel {
         }
 
         tPane = pane;
-        this.nuid = nuid + "";
         parFileNames.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
                 new String[]{
@@ -100,18 +109,17 @@ public class AtletiekNuPanel extends ResultsPanel {
                 .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
         );
 
-        tPane.addTab("AteltiekNu", this);
+        tPane.addTab("LiveResults", this);
         unzip = new UnzipUtility();
         try {
-            if (!AtletiekNuPanel.panel.test) {
-                loginHandler = new LoginHandler(this.nuid);
+            if (!panel.test) {
                 UpdateListRemote();
             } else {
                 UpdateListFromLocal();
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveResultsPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
         ResultsHandler handelr = new ResultsHandler(baseDir);
         handelr.start();
@@ -133,9 +141,7 @@ public class AtletiekNuPanel extends ResultsPanel {
 
     public void UpdateListRemote() {
         try {
-            loginHandler.getZip(MainWindow.mainObj.wedstrijdId + "");
-            unzip.unzip("tmp.zip", baseDir.getPath());
-            new File("tmp.zip").delete();
+            getParFiles();
             ((DefaultTableModel) parFileNames.getModel()).setRowCount(0);
             for (File fileEntry : baseDir.listFiles()) {
                 if (fileEntry.getName().endsWith("par")) {
@@ -155,7 +161,7 @@ public class AtletiekNuPanel extends ResultsPanel {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveResultsPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -181,9 +187,63 @@ public class AtletiekNuPanel extends ResultsPanel {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveResultsPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    private void getParFiles() {
+        int i = 1;
+        for (Onderdelen onderdeel : MainWindow.mainObj.wedstrijdOnderdelen) {
+            TreeSet<StartLijsten> set = new TreeSet<StartLijsten>(new Comparator<StartLijsten>() {
+                public int compare(StartLijsten one, StartLijsten other) {
+                    return one.getSerie() > other.getSerie() ? +1 : one.getSerie() < other.getSerie() ? -1 : one.getBaan() > other.getBaan() ? +1 : one.getBaan() < other.getBaan() ? -1 : 0;
+                }
+            });
+            Set startLijstens = onderdeel.getStartLijstens();
+            set.addAll(startLijstens);
+            PrintWriter writer = null;
+            int lastSerie = -1;
+            boolean open = false;
+            for (StartLijsten startlijst : set) {
+                try {
+                    if (lastSerie != startlijst.getSerie()) {
+                        if (open) {
+                            writer.close();
+                            i++;
+                        }
+                        open = true;
+                        lastSerie = startlijst.getSerie();
+                        writer = new PrintWriter(baseDir.getAbsolutePath() + String.format("/%03d.par", i), "UTF-8");
+                        writer.printf("# startlijst_onderdeel_id:%d\n", onderdeel.getId());
+                        writer.printf("# Versie:\t\t1\n");
+                        writer.printf("# Begin Tijd:\t%tY-%<tm-%<td_%<tH%<tMu\n", onderdeel.getTijd());
+                        writer.printf("# Startgroep:\t%s\n", onderdeel.getCategorie());
+                        writer.printf("# Onderdeel:\t%s\n", onderdeel.getOnderdeel());
+                        writer.printf("# Serie:\t\t%s\n", startlijst.getSerie());
+                    }
+                    writer.printf("%d\t%d\t%s (%s)\t%s\n", startlijst.getAtleten().getStartnummer(), startlijst.getBaan(), startlijst.getAtleten().getNaam(), startlijst.getAtleten().getVereniging(), startlijst.getOnderdelen().getRaceName());
+
+                    /*
+# startlijst_onderdeel_id:31677201
+# Versie:		2
+# Begin Tijd:	2016-09-04_1100u
+# Startgroep:	MJD1
+# Onderdeel:	60mH
+# Serie:		1	
+287	1	Belle  Schyns (PHNX)	MJD1 60mH serie 1 versie 2
+                     */
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(LiveResultsPanel.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(LiveResultsPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (open) {
+                writer.close();
+                i++;
+            }
+        }
     }
 
 }

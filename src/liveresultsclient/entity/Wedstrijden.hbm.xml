@@ -23,7 +23,7 @@
         <property name="public_" type="java.lang.Boolean">
             <column name="Public" />
         </property>
-        <set name="onderdelens" table="Onderdelen" inverse="true" lazy="true" fetch="select">
+        <set cascade="save-update" name="onderdelens" table="Onderdelen" lazy="true" fetch="select">
             <key>
                 <column name="WedstrijdID" not-null="true" />
             </key>
@@ -35,13 +35,13 @@
             </key>
             <one-to-many class="liveresultsclient.entity.Atleten" />
         </set>
-        <set name="atletiekNus" table="AtletiekNu" inverse="true" lazy="true" fetch="select">
+        <set cascade="save-update" name="atletiekNus" table="AtletiekNu" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="WedstrijdID" not-null="true" />
             </key>
             <one-to-many class="liveresultsclient.entity.AtletiekNu" />
         </set>
-        <set name="sisresults" table="SISResult" inverse="true" lazy="true" fetch="select">
+        <set cascade="save-update" name="sisresults" table="SISResult" inverse="true" lazy="true" fetch="select">
             <key>
                 <column name="wedstridj_id" not-null="true" />
             </key>

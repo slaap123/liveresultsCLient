@@ -5,8 +5,6 @@ package gui;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Vector;
@@ -22,6 +20,7 @@ import liveresultsclient.entity.Onderdelen;
 import liveresultsclient.entity.Sisresult;
 import liveresultsclient.entity.StartLijsten;
 import liveresultsclient.entity.Wedstrijden;
+import utils.CreateFakeWedstrijd;
 import utils.HibernateSessionHandler;
 
 /**
@@ -40,19 +39,20 @@ public class MainWindow extends javax.swing.JFrame {
 
     public int wedstrijdId = -1;
     private int OnderdeelId = -1;
-    
+
     public static MainWindow mainObj;
-    
+    public List<Onderdelen> wedstrijdOnderdelen;
+
     private HibernateSessionHandler sessionHandler;
-    
+
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
-        sessionHandler=HibernateSessionHandler.get();
+        sessionHandler = HibernateSessionHandler.get();
         UpdateGui();
-        
+
     }
 
     public void UpdateGui() {
@@ -72,15 +72,22 @@ public class MainWindow extends javax.swing.JFrame {
             displayResultAtleten(QUERY_Atleten + wedstrijdId, AtletenTable);
             Tabs.setEnabledAt(0, true);
             Tabs.setEnabledAt(1, true);
-            try{
-                int wid=((AtletiekNu)sessionHandler.executeHQLQuery("from AtletiekNu where wedstrijdid = "+wedstrijdId).get(0)).getNuid();
-                AtletiekNuPanel.GetAtletiekNuPanel(Tabs,wid);
-            }catch(Exception ex){
+            try {
+                List list = sessionHandler.executeHQLQuery("from AtletiekNu where wedstrijdid = " + wedstrijdId);
+                if (list != null&&list.size()>0) {
+                    AtletiekNu atliekNuWedstrijd = ((AtletiekNu) list.get(0));
+                    if (atliekNuWedstrijd != null) {
+                        int wid = atliekNuWedstrijd.getNuid();
+                        AtletiekNuPanel.GetAtletiekNuPanel(Tabs, wid);
+                    }
+                }else{
+                    LiveResultsPanel.GetAtletiekNuPanel(Tabs);
+                }
+            } catch (Exception ex) {
                 Logger.getLogger(AtletiekNuPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
-
 
     private void displayResultWedstrijden(String query, JTable table) {
         List resultList = sessionHandler.executeHQLQuery(query);
@@ -109,21 +116,22 @@ public class MainWindow extends javax.swing.JFrame {
                 wedstrijdId = (int) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 4);
                 UpdateGui();
                 Sisresult.startHandler();
+                System.out.println("//started sis handler");
                 Tabs.setSelectedIndex(1);
             }
         };
         Action niks = new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                
+
             }
         };
-        CheckboxColumn checkboxColumn = new CheckboxColumn(table,niks, 3);
+        CheckboxColumn checkboxColumn = new CheckboxColumn(table, niks, 3);
         ButtonColumn buttonColumn = new ButtonColumn(table, open, 4, "Open");
 
     }
 
     private void displayResultOnderdelen(String query, JTable table) {
-        List resultList = sessionHandler.executeHQLQuery(query);
+        wedstrijdOnderdelen = sessionHandler.executeHQLQuery(query);
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Naam");
@@ -132,7 +140,8 @@ public class MainWindow extends javax.swing.JFrame {
         tableHeaders.add("Racenaam");
         tableHeaders.add("Ready");
         tableHeaders.add("");
-        for (Object o : resultList) {
+        
+        for (Object o : wedstrijdOnderdelen) {
             Onderdelen onderdeel = (Onderdelen) o;
             Vector<Object> oneRow = new Vector<Object>();
             oneRow.add(onderdeel.getOnderdeel());
@@ -216,7 +225,6 @@ public class MainWindow extends javax.swing.JFrame {
         table.setModel(new DefaultTableModel(tableData, tableHeaders));
     }
 
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -243,6 +251,8 @@ public class MainWindow extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -379,6 +389,22 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu1.add(jMenuItem1);
         jMenuItem1.getAccessibleContext().setAccessibleName("");
 
+        jMenuItem2.setText("fill fake wedstrijd");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
+
+        jMenuItem3.setText("Clean Wedstrijd");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem3);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Import/Export");
@@ -402,6 +428,15 @@ public class MainWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        new CreateFakeWedstrijd();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -411,7 +446,7 @@ public class MainWindow extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        /*try {
+ /*try {
          for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
          if ("Nimbus".equals(info.getName())) {
          javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -432,7 +467,7 @@ public class MainWindow extends javax.swing.JFrame {
          /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                mainObj=new MainWindow();
+                mainObj = new MainWindow();
                 mainObj.setVisible(true);
             }
         });
@@ -453,6 +488,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
