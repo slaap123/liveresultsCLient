@@ -6,6 +6,8 @@ package gui;
  * and open the template in the editor.
  */
 import java.awt.event.ActionEvent;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -90,7 +92,15 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void displayResultWedstrijden(String query, JTable table) {
+        
         List resultList = sessionHandler.executeHQLQuery(query);
+        Collections.sort(resultList, new Comparator<Wedstrijden>() {
+                @Override
+                public int compare(Wedstrijden a, Wedstrijden b) {
+                    // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                    return -1*a.getDatum().compareTo(b.getDatum());
+                }
+            });
         Vector<String> tableHeaders = new Vector<String>();
         Vector tableData = new Vector();
         tableHeaders.add("Naam");
