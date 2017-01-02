@@ -161,7 +161,6 @@ public class ResultsHandler extends Thread {
                 DateFormat format = new SimpleDateFormat("d-M-yyyy - HH:mm:ss", Locale.ENGLISH);
                 Date date = format.parse(lines.get(0).split("\t")[4]);
                 parFile.startInformatie = sessionHandler.getClossedSisResult(MainWindow.mainObj.wedstrijdId, date);
-                System.out.println(parFile.startInformatie.getTime());
             } catch (ParseException ex) {
                 Logger.getLogger(ResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -9,6 +9,7 @@
     <property name="hibernate.connection.username">phanosamsterdam3</property>
     <property name="hibernate.connection.password">9L2e86StU4N8oz</property>
     <property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>
+    <property name="hibernate.connection.zeroDateTimeBehavior">convertToNull</property>
     <mapping resource="liveresultsclient/entity/Atleten.hbm.xml"/>
     <mapping resource="liveresultsclient/entity/Onderdelen.hbm.xml"/>
     <mapping resource="liveresultsclient/entity/AtletiekNu.hbm.xml"/>

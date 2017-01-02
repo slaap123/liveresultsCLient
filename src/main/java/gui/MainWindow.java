@@ -123,7 +123,7 @@ public class MainWindow extends javax.swing.JFrame {
             public void actionPerformed(ActionEvent e) {
                 JTable table = (JTable) e.getSource();
                 int modelRow = Integer.valueOf(e.getActionCommand());
-                wedstrijdId = (int) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 4);
+                wedstrijdId = (Integer) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 4);
                 UpdateGui();
                 Sisresult.startHandler();
                 System.out.println("//started sis handler");
@@ -167,7 +167,7 @@ public class MainWindow extends javax.swing.JFrame {
             public void actionPerformed(ActionEvent e) {
                 JTable table = (JTable) e.getSource();
                 int modelRow = Integer.valueOf(e.getActionCommand());
-                OnderdeelId = (int) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 5);
+                OnderdeelId = (Integer) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 5);
                 String name = (String) ((DefaultTableModel) table.getModel()).getValueAt(modelRow, 0);
                 StartlijstPanel panel = new StartlijstPanel(Tabs);
 
