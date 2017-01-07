@@ -152,7 +152,7 @@ public class LiveResultsPanel extends ResultsPanel {
                     } else {
                         entry = new ParFile(fileEntry);
                     }
-                    System.out.println("GotResults:" + entry.gotResults);
+                    //System.out.println("GotResults:" + entry.gotResults);
                     if (!entry.gotResults) {
                         ((DefaultTableModel) parFileNames.getModel()).addRow(new Object[]{entry.fileName, entry.onderdeel + " " + entry.startgroep, entry.serie});
                     }
@@ -178,7 +178,7 @@ public class LiveResultsPanel extends ResultsPanel {
                     } else {
                         entry = new ParFile(fileEntry);
                     }
-                    System.out.println("GotResults:" + entry.gotResults);
+                    //System.out.println("GotResults:" + entry.gotResults);
                     if (!entry.gotResults) {
                         ((DefaultTableModel) parFileNames.getModel()).addRow(new Object[]{entry.fileName, entry.onderdeel + " " + entry.startgroep, entry.serie});
                     }
@@ -200,6 +200,7 @@ public class LiveResultsPanel extends ResultsPanel {
                     return one.getSerie() > other.getSerie() ? +1 : one.getSerie() < other.getSerie() ? -1 : one.getBaan() > other.getBaan() ? +1 : one.getBaan() < other.getBaan() ? -1 : 0;
                 }
             });
+            onderdeel.updateStartLijsten();
             Set startLijstens = onderdeel.getStartLijstens();
             set.addAll(startLijstens);
             PrintWriter writer = null;
@@ -214,6 +215,7 @@ public class LiveResultsPanel extends ResultsPanel {
                         }
                         open = true;
                         lastSerie = startlijst.getSerie();
+                        System.out.println(onderdeel.getOnderdeel());
                         writer = new PrintWriter(baseDir.getAbsolutePath() + String.format("/%03d.par", i), "UTF-8");
                         writer.printf("# startlijst_onderdeel_id:%d\n", onderdeel.getId());
                         writer.printf("# Versie:\t\t1\n");

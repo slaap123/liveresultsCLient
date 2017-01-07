@@ -104,7 +104,20 @@ public class HibernateSessionHandler {
         return null;
 
     }
-
+    public void update(Object object) {
+        Session session = null;
+        try {
+            session = getSession();
+            session.beginTransaction();
+            session.refresh(object);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.getTransaction().commit();
+            }
+        }
+    }
     public void save(Object object) {
         System.out.println("saving:" + object.getClass());
         Session session = null;

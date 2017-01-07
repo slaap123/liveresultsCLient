@@ -146,7 +146,7 @@ public class AtletiekNuPanel extends ResultsPanel {
                     } else {
                         entry = new ParFile(fileEntry);
                     }
-                    System.out.println("GotResults:" + entry.gotResults);
+                    //System.out.println("GotResults:" + entry.gotResults);
                     if (!entry.gotResults) {
                         ((DefaultTableModel) parFileNames.getModel()).addRow(new Object[]{entry.fileName, entry.onderdeel + " " + entry.startgroep, entry.serie});
                     }
@@ -172,7 +172,7 @@ public class AtletiekNuPanel extends ResultsPanel {
                     } else {
                         entry = new ParFile(fileEntry);
                     }
-                    System.out.println("GotResults:" + entry.gotResults);
+                    //System.out.println("GotResults:" + entry.gotResults);
                     if (!entry.gotResults) {
                         ((DefaultTableModel) parFileNames.getModel()).addRow(new Object[]{entry.fileName, entry.onderdeel + " " + entry.startgroep, entry.serie});
                     }

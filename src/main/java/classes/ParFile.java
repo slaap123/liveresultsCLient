@@ -69,11 +69,11 @@ public class ParFile {
         }
         String[] lines=content.split("\n");
         startlijst_onderdeel_id=Integer.parseInt(lines[0].split(":")[1].replaceAll("[ \t\n\r]*", ""));
-        versie=lines[1].split(":")[1].replaceAll("[ \t\r\n]*", "");
-        begin_tijd=lines[2].split(":")[1].replaceAll("[ \t\r\n]*", "");
-        startgroep=lines[3].split(":")[1].replaceAll("[ \t\r\n]*", "");
-        onderdeel=lines[4].split(":")[1].replaceAll("[ \t\r\n]*", "");
-        serie=lines[5].split(":")[1].replaceAll("[ \t\r\n]*", "");
+        versie=lines[1].split(":",2)[1].replaceAll("[ \t\r\n]*", "");
+        begin_tijd=lines[2].split(":",2)[1].replaceAll("[ \t\r\n]*", "");
+        startgroep=lines[3].split(":",2)[1].replaceAll("[ \t\r\n]*", "");
+        onderdeel=lines[4].split(":",2)[1].replaceAll("[ \t\r\n]*", "");
+        serie=lines[5].split(":",2)[1].replaceAll("[ \t\r\n]*", "");
         for (int i = 6; i < lines.length; i++) {
             if(lines[i].length()>2){
                 atleten.add(new ParFileEntry(lines[i].split("\t")));
