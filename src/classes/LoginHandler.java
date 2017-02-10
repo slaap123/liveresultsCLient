@@ -61,7 +61,7 @@ public class LoginHandler {
         String page = this.GetPageContent(url);
 
         List<NameValuePair> postParams
-                = this.getFormParams(page, "wouterkievit@gmail.com", "deen123");
+                = this.getFormParams(page, "phanosit@gmail.com", "2D400box");
         this.sendPost(url, postParams);
     }
 
